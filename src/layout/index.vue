@@ -1,26 +1,38 @@
 <template>
   <div :class="classObj" class="app-wrapper">
     <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
+    <!-- 左侧导航栏 -->
     <sidebar class="sidebar-container" />
-    <div class="main-container">
+    <div :class="{hasTagsView:needTagsView}" class="main-container">
       <div :class="{'fixed-header':fixedHeader}">
+        <!-- 顶部导航栏 -->
         <navbar />
+        <!-- 顶部标签卡 -->
+        <tags-view v-if="needTagsView" />
       </div>
+      <!-- 主体视图层 -->
       <app-main />
+      <right-panel v-if="showSettings">
+        <settings />
+      </right-panel>
     </div>
   </div>
 </template>
 
 <script>
-import { Navbar, Sidebar, AppMain } from './components'
+import RightPanel from '@/components/RightPanel'
+import { AppMain, Navbar, Settings, Sidebar, TagsView } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
 
 export default {
   name: 'Layout',
   components: {
+    AppMain,
     Navbar,
+    RightPanel,
+    Settings,
     Sidebar,
-    AppMain
+    TagsView
   },
   mixins: [ResizeMixin],
   computed: {
@@ -29,6 +41,12 @@ export default {
     },
     device() {
       return this.$store.state.app.device
+    },
+    showSettings() {
+      return this.$store.state.settings.showSettings
+    },
+    needTagsView() {
+      return this.$store.state.settings.tagsView
     },
     fixedHeader() {
       return this.$store.state.settings.fixedHeader
@@ -59,11 +77,13 @@ export default {
     position: relative;
     height: 100%;
     width: 100%;
+
     &.mobile.openSidebar{
       position: fixed;
       top: 0;
     }
   }
+
   .drawer-bg {
     background: #000;
     opacity: 0.3;
